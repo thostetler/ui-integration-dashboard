@@ -22,10 +22,30 @@ interface ComparisonOption {
 }
 
 const METRICS = [
-  { key: 'TTRL', name: 'Time to Request Loaded (TTRL)' },
-  { key: 'TTSBI', name: 'Time to Search Box Interaction (TTSBI)' },
-  { key: 'TTRS', name: 'Time to Results Shown (TTRS)' },
-  { key: 'TTRR', name: 'Time to Results Rendered (TTRR)' },
+  {
+    key: 'TTRL',
+    name: 'Time to Request Loaded (TTRL)',
+    description: 'How long until page loads and is usable',
+    details: 'Total time from initial page load until the page is fully rendered and interactive. Includes HTML parsing, CSS processing, and JS execution for initial render.'
+  },
+  {
+    key: 'TTSBI',
+    name: 'Time to Search Box Interaction (TTSBI)',
+    description: 'How long until search bar is ready',
+    details: 'Time from page load until the search input field is ready to accept input. First interaction point for users.'
+  },
+  {
+    key: 'TTRS',
+    name: 'Time to Results Shown (TTRS)',
+    description: 'How long to get initial search results',
+    details: 'Time from clicking the search button until the first set of results appears on screen. Includes network request, API processing, and DOM rendering.'
+  },
+  {
+    key: 'TTRR',
+    name: 'Time to Results Rendered (TTRR)',
+    description: 'How long to get refined search results',
+    details: 'Time from entering a refinement query until refined results appear. Should typically be faster than TTRS due to smaller result sets.'
+  },
 ];
 
 export default function PerformanceAnalysisDashboard() {
@@ -102,7 +122,7 @@ export default function PerformanceAnalysisDashboard() {
   const currentOption = comparisonOptions.find(opt => opt.id === selectedComparison);
 
   const renderMetricCharts = (allData: PerformanceData[]) => {
-    return METRICS.map(({ key, name }) => {
+    return METRICS.map(({ key, name, description, details }) => {
       const metricData = allData.filter(d => d.metric === key);
 
       if (metricData.length === 0) return null;
@@ -118,9 +138,13 @@ export default function PerformanceAnalysisDashboard() {
 
       return (
         <div key={key} className="bg-white rounded-xl shadow-md p-6 border border-slate-200">
-          <h3 className="text-xl font-bold text-slate-900 mb-4">
-            {name}
-          </h3>
+          <div className="mb-4">
+            <h3 className="text-xl font-bold text-slate-900 mb-1">
+              {name}
+            </h3>
+            <p className="text-sm text-slate-600 mb-1">{description}</p>
+            <p className="text-xs text-slate-500">{details}</p>
+          </div>
           {chartData.length === 0 ? (
             <div className="h-96 flex items-center justify-center text-slate-500">
               No data available
@@ -232,6 +256,29 @@ export default function PerformanceAnalysisDashboard() {
             ))}
           </select>
         </div>
+
+        {/* Current Selection Display */}
+        {currentOption && (
+          <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900 mb-1">
+                  {currentOption.group}
+                </h2>
+                <p className="text-lg text-slate-700">
+                  <span className="font-semibold">{currentOption.label}</span>
+                  <span className="text-slate-500 mx-2">•</span>
+                  <span className="text-slate-600">{allData.length} performance changes detected</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Charts */}
         <div className="space-y-6">
