@@ -41,4 +41,4 @@ export interface ComparisonLabels {
 }
 
 export type ThrottleType = 'normal' | '6x-cpu';
-export type ComparisonType = 'nov24-nov25' | 'oct-nov25' | 'jan-nov25';
+export type ComparisonType = 'nov24-oct25' | 'nov24-nov25' | 'oct-nov25' | 'jan25-oct25' | 'jan25-nov25';
