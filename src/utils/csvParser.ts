@@ -16,17 +16,28 @@ function getStatus(changePercent: number): 'SLOW' | 'OK' {
 }
 
 export async function loadCSV(filename: string): Promise<CSVRow[]> {
-  const response = await fetch(`/data/${filename}`);
+  const basePath = import.meta.env.BASE_URL || '/';
+  const url = `${basePath}data/${filename}`;
+  console.log(`Loading CSV from: ${url}`);
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${filename}: ${response.status} ${response.statusText}`);
+  }
+
   const csvText = await response.text();
+  console.log(`Loaded ${filename}: ${csvText.length} characters`);
 
   return new Promise((resolve, reject) => {
     Papa.parse<CSVRow>(csvText, {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
+        console.log(`Parsed ${filename}: ${results.data.length} rows`);
         resolve(results.data);
       },
       error: (error: Error) => {
+        console.error(`Error parsing ${filename}:`, error);
         reject(error);
       },
     });
@@ -60,7 +71,7 @@ export function calculateChanges(
       if (!isNaN(baseValue) && !isNaN(currentValue) && baseValue > 0) {
         const changePercent = ((currentValue - baseValue) / baseValue) * 100;
         const change = currentValue - baseValue;
-        if (Math.abs(changePercent) >= 5) { // Only include significant changes
+        if (Math.abs(changePercent) >= 2) { // Include changes >= 2%
           normalChanges.push({
             test: testName,
             metric,
@@ -84,7 +95,7 @@ export function calculateChanges(
       if (!isNaN(baseValue) && !isNaN(currentValue) && baseValue > 0) {
         const changePercent = ((currentValue - baseValue) / baseValue) * 100;
         const change = currentValue - baseValue;
-        if (Math.abs(changePercent) >= 5) { // Only include significant changes
+        if (Math.abs(changePercent) >= 2) { // Include changes >= 2%
           cpuChanges.push({
             test: testName,
             metric,
@@ -99,6 +110,8 @@ export function calculateChanges(
       }
     }
   }
+
+  console.log(`calculateChanges: Found ${normalChanges.length} normal changes, ${cpuChanges.length} 6x-cpu changes`);
 
   return {
     normal: normalChanges.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)),
