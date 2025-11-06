@@ -1,7 +1,10 @@
 export interface PerformanceData {
   test: string;
   metric: string;
+  baseline: number;
+  current: number;
   change: number;
+  changePercent: number;
   status?: 'SLOW' | 'OK';
   severity?: 'Critical' | 'High' | 'Medium' | 'Low';
 }

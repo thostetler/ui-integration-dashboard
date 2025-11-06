@@ -58,14 +58,18 @@ export function calculateChanges(
       const currentValue = parseFloat(currentRow[baseKey] || '');
 
       if (!isNaN(baseValue) && !isNaN(currentValue) && baseValue > 0) {
-        const change = ((currentValue - baseValue) / baseValue) * 100;
-        if (Math.abs(change) >= 5) { // Only include significant changes
+        const changePercent = ((currentValue - baseValue) / baseValue) * 100;
+        const change = currentValue - baseValue;
+        if (Math.abs(changePercent) >= 5) { // Only include significant changes
           normalChanges.push({
             test: testName,
             metric,
+            baseline: baseValue,
+            current: currentValue,
             change,
-            severity: getSeverity(change),
-            status: getStatus(change),
+            changePercent,
+            severity: getSeverity(changePercent),
+            status: getStatus(changePercent),
           });
         }
       }
@@ -78,14 +82,18 @@ export function calculateChanges(
       const currentValue = parseFloat(currentRow[baseKey] || '');
 
       if (!isNaN(baseValue) && !isNaN(currentValue) && baseValue > 0) {
-        const change = ((currentValue - baseValue) / baseValue) * 100;
-        if (Math.abs(change) >= 5) { // Only include significant changes
+        const changePercent = ((currentValue - baseValue) / baseValue) * 100;
+        const change = currentValue - baseValue;
+        if (Math.abs(changePercent) >= 5) { // Only include significant changes
           cpuChanges.push({
             test: testName,
             metric,
+            baseline: baseValue,
+            current: currentValue,
             change,
-            severity: getSeverity(change),
-            status: getStatus(change),
+            changePercent,
+            severity: getSeverity(changePercent),
+            status: getStatus(changePercent),
           });
         }
       }
@@ -93,8 +101,8 @@ export function calculateChanges(
   }
 
   return {
-    normal: normalChanges.sort((a, b) => Math.abs(b.change) - Math.abs(a.change)),
-    '6x-cpu': cpuChanges.sort((a, b) => Math.abs(b.change) - Math.abs(a.change)),
+    normal: normalChanges.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)),
+    '6x-cpu': cpuChanges.sort((a, b) => Math.abs(b.changePercent) - Math.abs(a.changePercent)),
   };
 }
 
