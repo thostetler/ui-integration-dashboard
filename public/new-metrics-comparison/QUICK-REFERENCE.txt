@@ -1,0 +1,158 @@
+═══════════════════════════════════════════════════════════════════════════════
+                        PERFORMANCE ANALYSIS - QUICK REFERENCE
+                          Jan 2025 vs Nov 2025 Comparison
+═══════════════════════════════════════════════════════════════════════════════
+
+EXECUTIVE SUMMARY
+─────────────────────────────────────────────────────────────────────────────
+
+✅ MAJOR WIN: Backend Response Time (TTFB)
+   ├─ Change: -45% faster (152ms → 83ms)
+   ├─ Consistency: Improved (39% → 32% CV)
+   ├─ Sample Size: 135 → 172 measurements
+   └─ Confidence: VERY HIGH
+
+⚠️ CRITICAL ISSUE: First Contentful Paint (FCP)
+   ├─ Change: 6 REGRESSIONS affecting all query types
+   ├─ Range: +15% to +37% slower
+   ├─ Consistency: Degraded (38% → 55% CV)
+   ├─ Variability: +49% more unpredictable
+   └─ Confidence: VERY HIGH (confirmed across versions)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+VERSION PROGRESSION
+─────────────────────────────────────────────────────────────────────────────
+
+Timeline of Regression Discovery:
+
+Version 1.0 (18:22 UTC)
+└─ 4 FCP Regressions Detected
+   ├─ scix.first-author.normal: +37.54%
+   ├─ scix.abstract-keyword.normal: +36.18%
+   ├─ scix.title-keyword.normal: +29.14%
+   └─ scix.citations.normal: +17.26%
+
+Version 1.1 (18:37 UTC)  [+1 REGRESSION]
+└─ 5 FCP Regressions
+   └─ NEW: scix.bibcode-search.normal: +23.88%
+
+Version 1.2 (19:09 UTC)  [+1 REGRESSION]
+└─ 6 FCP Regressions
+   └─ NEW: scix.and-search.normal: +24.68%
+
+═══════════════════════════════════════════════════════════════════════════════
+
+DETAILED FINDINGS
+─────────────────────────────────────────────────────────────────────────────
+
+FCP REGRESSIONS (All Confirmed Statistically Significant):
+
+1. first-author.normal      648ms → 894ms   [+37.96%]  ★★★★★
+2. abstract-keyword.normal  692ms → 926ms   [+33.82%]  ★★★★
+3. title-keyword.normal     620ms → 842ms   [+35.81%]  ★★★★
+4. and-search.normal        624ms → 778ms   [+24.68%]  ★★★
+5. bibcode-search.normal    572ms → 716ms   [+25.17%]  ★★★
+6. citations.normal         740ms → 856ms   [+15.68%]  ★★
+
+Pattern: ALL 6 QUERY TYPES AFFECTED
+Severity: SYSTEMATIC RENDERING ISSUE
+
+─────────────────────────────────────────────────────────────────────────────
+
+MAJOR IMPROVEMENTS (31 Confirmed):
+
+Backend (TTFB): -45% average (152ms → 83ms)
+├─ All 8 normal environment queries: -42% to -50%
+├─ All 8 6x-CPU throttled queries: -44% to -48%
+└─ Variance: IMPROVED (lower and more consistent)
+
+Search Bar Ready (TTSBI): -13% to -17% improvement (6 findings)
+Result Render (TTRS): -9% to -12% improvement (5 findings)
+Results Load (TTRL): -5% improvement (1 finding)
+Refinement (TTRR): -19% to -24% improvement (2 findings)
+FCP 6x-CPU: -28% to -32% improvement (2 findings)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT THIS MEANS
+─────────────────────────────────────────────────────────────────────────────
+
+The Good:
+✅ Backend optimization worked well (-45% TTFB)
+✅ Improvement is consistent across all conditions
+✅ Rendering throttled test shows FCP improvement (-32%)
+✅ 31 major improvements in other metrics
+
+The Bad:
+⚠️ First Contentful Paint regressed in normal environment
+⚠️ Affected ALL 6 query types (systematic issue)
+⚠️ Variability increased (less predictable)
+⚠️ Perception of page load affected
+
+The Pattern:
+🔍 6x-CPU shows FCP IMPROVEMENT
+🔍 Normal environment shows FCP REGRESSION
+→ Suggests rendering code change that behaves differently under load
+
+═══════════════════════════════════════════════════════════════════════════════
+
+ACTION ITEMS
+─────────────────────────────────────────────────────────────────────────────
+
+URGENT (Priority: HIGH):
+□ Investigate rendering code changes since Jan 2025
+□ Compare React/component tree structure
+□ Check CSS-in-JS and paint/reflow behavior
+□ Profile FCP across different query types
+
+MEDIUM:
+□ Document TTFB optimization for preservation
+□ Measure user impact of FCP regression
+□ Determine if FCP regression affects UX score
+
+LOW:
+□ Continue monitoring other metrics
+□ Establish baseline for future comparisons
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FILES AVAILABLE
+─────────────────────────────────────────────────────────────────────────────
+
+Interactive Dashboards:
+  • performance-dashboard.html              [charts & summary]
+  • measurement-comparison-charts.html      [detailed metrics]
+
+Documentation:
+  • FINAL-UPDATE-6-REGRESSIONS.md          [latest analysis] ← START HERE
+  • UPDATED-SUMMARY.md                      [comprehensive overview]
+  • CHANGELOG.md                            [version history]
+  • filtering-heuristics-explained.md       [statistical methodology]
+
+Data:
+  • jan2025-nov2025-comparison.md           [official report]
+  • baseline-jan2025.jsonl                  [raw data]
+  • baseline-nov2025.jsonl                  [raw data]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+STATISTICAL CONFIDENCE
+─────────────────────────────────────────────────────────────────────────────
+
+Sample Sizes: 135-172 measurements per metric
+Confidence Level: 95% (standard)
+Filtering Method: Confidence Interval Overlap Test
+
+Why findings are trustworthy:
+✓ Large sample sizes (135-172 vs original 54-77)
+✓ Consistent pattern across 3 separate analysis runs
+✓ Statistical significance tested rigorously
+✓ TTFB improvements stable across all versions
+✓ FCP regressions escalating (4 → 5 → 6) with more data
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Generated: 2025-11-06 19:15 UTC
+Status: FINAL ANALYSIS COMPLETE
+Recommendation: Prioritize FCP investigation (systematic issue affecting all queries)

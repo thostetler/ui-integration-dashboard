@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Comparison: Jan 2025 → Nov 2025</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-card.positive { border-left: 4px solid #10b981; }
+        .summary-card.negative { border-left: 4px solid #ef4444; }
+        .summary-card.neutral { border-left: 4px solid #6366f1; }
+
+        .card-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+
+        .card-subtext {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .details-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .details-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .metric-bar {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        .metric-bar:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .metric-name {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 0.4rem;
+            font-weight: 500;
+        }
+
+        .metric-change {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .change-value {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .change-value.positive {
+            color: #10b981;
+        }
+
+        .change-value.negative {
+            color: #ef4444;
+        }
+
+        .change-baseline {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            color: #94a3b8;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .metric-breakdown {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .metric-item:last-child {
+            border-bottom: none;
+        }
+
+        .metric-item-name {
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .metric-item-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-improved {
+            color: #10b981;
+        }
+
+        .stat-regressed {
+            color: #ef4444;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid, .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Performance Comparison Report</h1>
+            <p>Jan 2025 baseline vs Nov 2025 current • Generated: 2025-11-06</p>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card positive">
+                <div class="card-label">🎯 Major Improvements</div>
+                <div class="card-value">31</div>
+                <div class="card-subtext">Statistically significant gains</div>
+            </div>
+            <div class="summary-card negative">
+                <div class="card-label">⚠️ Regressions</div>
+                <div class="card-value">6</div>
+                <div class="card-subtext">FCP metric: ALL query types affected</div>
+            </div>
+            <div class="summary-card neutral">
+                <div class="card-label">📊 Slight Improvements</div>
+                <div class="card-value">19</div>
+                <div class="card-subtext">Statistically significant</div>
+            </div>
+            <div class="summary-card neutral">
+                <div class="card-label">➡️ Unchanged</div>
+                <div class="card-value">40</div>
+                <div class="card-subtext">No meaningful change</div>
+            </div>
+        </div>
+
+        <!-- Overview Charts -->
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">Overall Performance Changes</div>
+                <div class="chart-wrapper">
+                    <canvas id="overviewChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Major Improvements</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Regressions</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #6366f1;"></div>
+                        <span>Slight Changes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Metric Categories Performance</div>
+                <div class="chart-wrapper">
+                    <canvas id="metricChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #06b6d4;"></div>
+                        <span>TTFB (Backend)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8b5cf6;"></div>
+                        <span>TTSBI (Ready)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>Other</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environment Comparison -->
+        <div class="chart-container" style="margin-bottom: 2rem;">
+            <div class="chart-title">Performance by Environment</div>
+            <div class="chart-wrapper" style="height: 300px;">
+                <canvas id="environmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Regression Details -->
+        <div class="details-container" style="margin-bottom: 2rem;">
+            <div class="details-title">⚠️ Regressions (FCP Metric)</div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.first-author.normal</div>
+                <div class="metric-change">
+                    <span class="change-value negative">+36.28%</span>
+                    <span class="change-baseline">656ms → 894ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.abstract-keyword.normal</div>
+                <div class="metric-change">
+                    <span class="change-value negative">+34.20%</span>
+                    <span class="change-baseline">690ms → 926ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.title-keyword.normal</div>
+                <div class="metric-change">
+                    <span class="change-value negative">+28.35%</span>
+                    <span class="change-baseline">656ms → 842ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.citations.normal</div>
+                <div class="metric-change">
+                    <span class="change-value negative">+14.75%</span>
+                    <span class="change-baseline">746ms → 856ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Improvements -->
+        <div class="details-container" style="margin-bottom: 2rem;">
+            <div class="details-title">✅ Top 10 Improvements</div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.citations.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-52.03%</span>
+                    <span class="change-baseline">170.1ms → 81.6ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.and-search.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-48.13%</span>
+                    <span class="change-baseline">165.4ms → 85.8ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.first-author.6x-cpu → TTRR</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-42.06%</span>
+                    <span class="change-baseline">5348.2ms → 3098.7ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.bibcode-search.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-46.04%</span>
+                    <span class="change-baseline">154ms → 83.1ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.abstract-keyword.6x-cpu → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-48.44%</span>
+                    <span class="change-baseline">153.8ms → 79.3ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.year-range.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-44.14%</span>
+                    <span class="change-baseline">151.1ms → 84.4ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.title-keyword.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-45.77%</span>
+                    <span class="change-baseline">151.4ms → 82.1ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.first-author.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-42.67%</span>
+                    <span class="change-baseline">150ms → 86ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.abstract-keyword.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-45.47%</span>
+                    <span class="change-baseline">153.3ms → 83.6ms</span>
+                </div>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">scix.full-text.normal → TTFB</div>
+                <div class="metric-change">
+                    <span class="change-value positive">-44.05%</span>
+                    <span class="change-baseline">145.5ms → 81.4ms</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metric Breakdown -->
+        <div class="metric-breakdown">
+            <div class="details-title">📈 Performance by Metric Type</div>
+            <div class="metric-item">
+                <div class="metric-item-name">TTFB (Time to First Byte)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-improved">↓ -45% avg improvement</div>
+                    <div>9 instances</div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-item-name">TTSBI (Time to Search Bar Interaction)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-improved">↓ -14% avg improvement</div>
+                    <div>6 instances</div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-item-name">FCP (First Content Paint)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-regressed">↑ +25% avg regression</div>
+                    <div>4 regressions</div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-item-name">TTRL (Time to Results Load)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-improved">↓ -7% avg improvement</div>
+                    <div>mostly unchanged</div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-item-name">TTRS (Time to Results Search)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-improved">↓ -11% avg improvement</div>
+                    <div>6 instances</div>
+                </div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-item-name">TTRR (Time to Refine Results)</div>
+                <div class="metric-item-stats">
+                    <div class="stat-improved">↓ -33% avg improvement</div>
+                    <div>2 major improvements</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="details-container">
+            <div class="details-title">🔍 Key Insights</div>
+            <div class="metric-bar">
+                <div class="metric-name">Backend Performance (TTFB)</div>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">
+                    Massive 45% average improvement across all environments. Server response time has been dramatically optimized, with consistent gains across all query types and CPU profiles.
+                </p>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">Search Bar Ready Time (TTSBI)</div>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">
+                    14% average improvement in normal environment. Users can interact with search bar faster in most scenarios.
+                </p>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">FCP Regressions</div>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">
+                    Only 4 regressions detected, all in FCP metric (14-36% slower). This may indicate a shift in rendering strategy—investigate whether content prioritization changed.
+                </p>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">6x CPU Throttling</div>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">
+                    Consistent improvements under heavy throttling (TTFB -48% avg), suggesting backend optimizations benefit resource-constrained environments most.
+                </p>
+            </div>
+            <div class="metric-bar">
+                <div class="metric-name">Refine Results (TTRR)</div>
+                <p style="color: #cbd5e1; font-size: 0.9rem;">
+                    Major improvements on CPU-throttled tests (-24% to -42%), indicating faster incremental query handling under constraint.
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            <p>Baseline: baseline/baseline-jan2025.jsonl | Current: baseline/baseline-nov2025.jsonl</p>
+            <p>Sample sizes ranged from 54→120 (normal) to 101→236 (6x-cpu) for statistical robustness</p>
+        </footer>
+    </div>
+
+    <script>
+        // Overview Chart - Donut
+        new Chart(document.getElementById('overviewChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Major Improvements', 'Regressions', 'Slight Changes', 'Unchanged'],
+                datasets: [{
+                    data: [31, 6, 19, 40],
+                    backgroundColor: [
+                        '#10b981',
+                        '#ef4444',
+                        '#6366f1',
+                        '#64748b'
+                    ],
+                    borderColor: '#1e293b',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#cbd5e1',
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Metric Category Chart - Bar
+        new Chart(document.getElementById('metricChart'), {
+            type: 'bar',
+            data: {
+                labels: ['TTFB', 'TTSBI', 'TTRS', 'TTRR', 'TTRL', 'FCP'],
+                datasets: [
+                    {
+                        label: 'Improvements',
+                        data: [9, 6, 6, 2, 11, 1],
+                        backgroundColor: '#10b981'
+                    },
+                    {
+                        label: 'Regressions',
+                        data: [0, 0, 0, 0, 0, 4],
+                        backgroundColor: '#ef4444'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#cbd5e1', font: { size: 12 } }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    y: {
+                        stacked: true,
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // Environment Chart - Horizontal Bar
+        new Chart(document.getElementById('environmentChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Normal Environment', '6x CPU Throttle'],
+                datasets: [
+                    {
+                        label: 'TTFB Improvement %',
+                        data: [46.3, 47.2],
+                        backgroundColor: '#06b6d4'
+                    },
+                    {
+                        label: 'TTSBI Improvement %',
+                        data: [14.2, 2.1],
+                        backgroundColor: '#8b5cf6'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#cbd5e1', font: { size: 12 } }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

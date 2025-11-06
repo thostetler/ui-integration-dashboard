@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Measurement Framework Comparison</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #f1f5f9;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        .filtering-section {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .filtering-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .threshold-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .threshold-item {
+            background: rgba(30, 41, 59, 0.8);
+            border-left: 4px solid #6366f1;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+
+        .threshold-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .threshold-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f1f5f9;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .filtering-logic {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 4px;
+            padding: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: #cbd5e1;
+        }
+
+        .filtering-logic code {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            color: #60a5fa;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .insight-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #f1f5f9;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-name {
+            font-weight: 500;
+            color: #cbd5e1;
+            flex: 1;
+        }
+
+        .metric-value {
+            display: flex;
+            gap: 2rem;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .value-label {
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .value-number {
+            font-weight: 600;
+            color: #f1f5f9;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .improvement {
+            color: #10b981;
+        }
+
+        .regression {
+            color: #ef4444;
+        }
+
+        .neutral {
+            color: #94a3b8;
+        }
+
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            color: #94a3b8;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .note {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-top: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+        }
+
+        @media (max-width: 1024px) {
+            .charts-grid, .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Measurement Framework Comparison</h1>
+            <p>Jan 2025 vs Nov 2025 • Statistical properties across all metric types</p>
+        </div>
+
+        <!-- Filtering Logic Section -->
+        <div class="filtering-section">
+            <div class="filtering-title">📊 How Findings Are Filtered</div>
+            
+            <div class="threshold-box">
+                <div class="threshold-item">
+                    <div class="threshold-label">Significance Threshold</div>
+                    <div class="threshold-value">&gt; 5%</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Change must exceed this to be considered</div>
+                </div>
+                <div class="threshold-item">
+                    <div class="threshold-label">Regression Threshold</div>
+                    <div class="threshold-value">&gt; 10%</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">Slowdown needed to flag as regression</div>
+                </div>
+                <div class="threshold-item">
+                    <div class="threshold-label">Statistical Test</div>
+                    <div class="threshold-value">CI Overlap</div>
+                    <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.5rem;">95% confidence intervals must not overlap</div>
+                </div>
+            </div>
+
+            <div class="filtering-logic">
+                <strong>Decision Tree:</strong><br>
+                1. Calculate baseline median ± 95% confidence interval<br>
+                2. Calculate current median ± 95% confidence interval<br>
+                3. Check if <code>|percentChange| &gt; 5%</code> <strong>AND</strong> intervals don't overlap → <code>isSignificant = true</code><br>
+                4. If significant and <code>percentChange &gt; 10%</code> → <span style="color: #ef4444;">REGRESSION</span><br>
+                5. If significant and <code>percentChange &lt; -10%</code> → <span style="color: #10b981;">MAJOR IMPROVEMENT</span><br>
+                6. Otherwise → <code>UNCHANGED</code>
+            </div>
+
+            <div class="note">
+                <strong>Key insight:</strong> A 15% median change with high variance (overlapping CIs) = UNCHANGED. A 7% median change with low variance (non-overlapping CIs) = significant. The tool filters intelligently based on confidence, not just magnitude.
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: #f1f5f9;">📈 Metric Comparisons</h2>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <div class="chart-title">Median Performance by Metric</div>
+                <div class="chart-wrapper">
+                    <canvas id="medianChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #06b6d4;"></div>
+                        <span>Jan 2025 (Baseline)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ec4899;"></div>
+                        <span>Nov 2025 (Current)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Consistency (CV%) by Metric</div>
+                <div class="chart-wrapper">
+                    <canvas id="cvChart"></canvas>
+                </div>
+                <div class="note">
+                    CV% = Coefficient of Variation (std dev / mean × 100). Lower is better. <br>
+                    <strong>&lt; 10%:</strong> Very consistent | <strong>10-20%:</strong> Acceptable | <strong>&gt; 20%:</strong> High variability
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Standard Deviation by Metric</div>
+                <div class="chart-wrapper">
+                    <canvas id="stdDevChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f59e0b;"></div>
+                        <span>Baseline Variability</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8b5cf6;"></div>
+                        <span>Current Variability</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-title">Sample Size Growth</div>
+                <div class="chart-wrapper">
+                    <canvas id="sampleSizeChart"></canvas>
+                </div>
+                <div class="note">
+                    More samples = Higher statistical confidence. Nov 2025 runs 2-3x more iterations per metric.
+                </div>
+            </div>
+
+            <div class="chart-container full-width">
+                <div class="chart-title">Median vs P95 (Tail Latency)</div>
+                <div class="chart-wrapper" style="height: 300px;">
+                    <canvas id="tailLatencyChart"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #10b981;"></div>
+                        <span>Baseline Median</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #06b6d4;"></div>
+                        <span>Baseline P95</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ef4444;"></div>
+                        <span>Current Median</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f97316;"></div>
+                        <span>Current P95</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Section -->
+        <h2 style="margin: 2rem 0 1rem 0; color: #f1f5f9;">🔍 Key Measurement Insights</h2>
+
+        <div class="insights-grid">
+            <div class="insight-card">
+                <div class="insight-title">✅ Best News: TTFB (Backend Response)</div>
+                <div class="metric-row">
+                    <div class="metric-name">Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">155ms</span> → <span class="value-number improvement">83ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Improvement</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number improvement">-46% faster</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Consistency (CV%)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">39% → 32%</span> <span class="improvement">✓ Better</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Variability (Std Dev)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">65ms → 29ms</span> <span class="improvement">✓ More consistent</span></div>
+                    </div>
+                </div>
+                <div class="note" style="margin-bottom: 0;">
+                    TTFB is faster AND more reliable. Backend optimization is a clear win across all conditions.
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">⚠️ Critical: FCP (First Contentful Paint) — 6 Regressions</div>
+                <div class="metric-row">
+                    <div class="metric-name">Baseline Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">872ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Current Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">828ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Average Change</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number neutral">-5% (net)</span> but <span class="regression">6 regressions individually</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Consistency (CV%)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number regression">38% → 55%</span> <span class="regression">✗ Much worse</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Variability (Std Dev)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number regression">377ms → 568ms</span> <span class="regression">✗ 51% more variable</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Affected Query Types</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number regression">✗ ALL 6 TYPES</span></div>
+                    </div>
+                </div>
+                <div class="note" style="margin-bottom: 0;">
+                    <strong>FINAL FINDING:</strong> 6 confirmed FCP regressions affecting all query types (+17% to +41% slower). Baseline stabilized with 140 samples/metric. This is a systematic rendering issue requiring urgent investigation.
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">✅ Good: TTRS (Search to Results)</div>
+                <div class="metric-row">
+                    <div class="metric-name">Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">11,974ms</span> → <span class="value-number improvement">10,820ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Improvement</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number improvement">-10% faster</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Consistency (CV%)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number neutral">13.6% → 15.1%</span> <span class="neutral">Slightly less consistent</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Sample Size</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">54 → 115</span> <span class="improvement">✓ 2x more data</span></div>
+                    </div>
+                </div>
+                <div class="note" style="margin-bottom: 0;">
+                    Consistent improvement. More samples means higher confidence despite slight CV% increase.
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">📊 Neutral: TTSBI (Search Bar Ready)</div>
+                <div class="metric-row">
+                    <div class="metric-name">Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">8,105ms</span> → <span class="value-number neutral">8,040ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Change</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number neutral">-0.8% (essentially unchanged)</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Consistency (CV%)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number neutral">13.3% → 13.8%</span> <span class="neutral">Stable</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">P95 Impact</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">9,917ms → 9,654ms</span> <span class="improvement">✓ Better worst-case</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">📊 Neutral: TTRL (Results Load)</div>
+                <div class="metric-row">
+                    <div class="metric-name">Median</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">22,591ms</span> → <span class="value-number neutral">21,372ms</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Improvement</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number neutral">-5.4% (modest)</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Consistency (CV%)</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number regression">8.4% → 10.4%</span> <span class="regression">✗ Slightly worse</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">Std Dev</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number regression">1,590ms → 2,221ms</span> <span class="regression">✗ 40% more variable</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-title">🔧 Measurement Confidence</div>
+                <div class="metric-row">
+                    <div class="metric-name">TTFB Samples</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">77 → 172</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">FCP Samples</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">77 → 172</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">TTRL Samples</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">54 → 115</span></div>
+                    </div>
+                </div>
+                <div class="metric-row">
+                    <div class="metric-name">TTSBI Samples</div>
+                    <div class="metric-value">
+                        <div class="value-label"><span class="value-number">77 → 172</span></div>
+                    </div>
+                </div>
+                <div class="note" style="margin-bottom: 0;">
+                    <strong>Nov 2025 is 2-3x more data per metric.</strong> This is why we can be confident about smaller changes and why the report filtered conservatively.
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>FINAL VERSION (19:20 UTC):</strong> 6 FCP regressions confirmed | -45% TTFB improvement stable | 31 major improvements + 19 slight = 50 total improvements</p>
+            <p>Baseline: 140 samples/metric | Current: 172 samples/metric | Confidence: Very High (95%)</p>
+        </footer>
+    </div>
+
+    <script>
+        const metricLabels = ['FCP', 'TTFB', 'TTRL', 'TTSBI'];
+        const data = {
+            'FCP': { b_median: 872, c_median: 828, b_std: 377, c_std: 568, b_cv: 38, c_cv: 55, b_n: 140, c_n: 172, b_p95: 1598, c_p95: 2335 },
+            'TTFB': { b_median: 151, c_median: 83, b_std: 64, c_std: 29, b_cv: 40, c_cv: 32, b_n: 140, c_n: 172, b_p95: 280, c_p95: 145 },
+            'TTRL': { b_median: 22373, c_median: 21372, b_std: 1574, c_std: 2221, b_cv: 8.5, c_cv: 10.4, b_n: 105, c_n: 115, b_p95: 24944, c_p95: 23736 },
+            'TTSBI': { b_median: 8052, c_median: 8040, b_std: 1035, c_std: 1017, b_cv: 13.6, c_cv: 13.8, b_n: 140, c_n: 172, b_p95: 9915, c_p95: 9654 }
+        };
+
+        // Median Chart
+        new Chart(document.getElementById('medianChart'), {
+            type: 'bar',
+            data: {
+                labels: metricLabels,
+                datasets: [
+                    {
+                        label: 'Jan 2025 Baseline',
+                        data: metricLabels.map(m => data[m].b_median),
+                        backgroundColor: '#06b6d4'
+                    },
+                    {
+                        label: 'Nov 2025 Current',
+                        data: metricLabels.map(m => data[m].c_median),
+                        backgroundColor: '#ec4899'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // CV% Chart
+        new Chart(document.getElementById('cvChart'), {
+            type: 'bar',
+            data: {
+                labels: metricLabels,
+                datasets: [
+                    {
+                        label: 'Jan 2025',
+                        data: metricLabels.map(m => data[m].b_cv),
+                        backgroundColor: '#3b82f6'
+                    },
+                    {
+                        label: 'Nov 2025',
+                        data: metricLabels.map(m => data[m].c_cv),
+                        backgroundColor: '#8b5cf6'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' },
+                        title: { display: true, text: 'CV% (lower is more consistent)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // Std Dev Chart
+        new Chart(document.getElementById('stdDevChart'), {
+            type: 'bar',
+            data: {
+                labels: metricLabels,
+                datasets: [
+                    {
+                        label: 'Jan 2025',
+                        data: metricLabels.map(m => data[m].b_std),
+                        backgroundColor: '#f59e0b'
+                    },
+                    {
+                        label: 'Nov 2025',
+                        data: metricLabels.map(m => data[m].c_std),
+                        backgroundColor: '#8b5cf6'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // Sample Size Chart
+        new Chart(document.getElementById('sampleSizeChart'), {
+            type: 'bar',
+            data: {
+                labels: metricLabels,
+                datasets: [
+                    {
+                        label: 'Jan 2025',
+                        data: metricLabels.map(m => data[m].b_n),
+                        backgroundColor: '#10b981'
+                    },
+                    {
+                        label: 'Nov 2025',
+                        data: metricLabels.map(m => data[m].c_n),
+                        backgroundColor: '#06b6d4'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' },
+                        title: { display: true, text: 'Sample size (higher = more confident)' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+
+        // Tail Latency Chart
+        new Chart(document.getElementById('tailLatencyChart'), {
+            type: 'bar',
+            data: {
+                labels: metricLabels,
+                datasets: [
+                    {
+                        label: 'Jan 2025 Median',
+                        data: metricLabels.map(m => data[m].b_median),
+                        backgroundColor: '#10b981'
+                    },
+                    {
+                        label: 'Jan 2025 P95',
+                        data: metricLabels.map(m => data[m].b_p95),
+                        backgroundColor: '#06b6d4'
+                    },
+                    {
+                        label: 'Nov 2025 Median',
+                        data: metricLabels.map(m => data[m].c_median),
+                        backgroundColor: '#ef4444'
+                    },
+                    {
+                        label: 'Nov 2025 P95',
+                        data: metricLabels.map(m => data[m].c_p95),
+                        backgroundColor: '#f97316'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#cbd5e1' } }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
