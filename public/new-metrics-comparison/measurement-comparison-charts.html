@@ -587,12 +587,14 @@
     </div>
 
     <script>
-        const metricLabels = ['FCP', 'TTFB', 'TTRL', 'TTSBI'];
+        const metricLabels = ['FCP', 'TTFB', 'TTRL', 'TTRR', 'TTRS', 'TTSBI'];
         const data = {
-            'FCP': { b_median: 872, c_median: 828, b_std: 377, c_std: 568, b_cv: 38, c_cv: 55, b_n: 140, c_n: 172, b_p95: 1598, c_p95: 2335 },
-            'TTFB': { b_median: 151, c_median: 83, b_std: 64, c_std: 29, b_cv: 40, c_cv: 32, b_n: 140, c_n: 172, b_p95: 280, c_p95: 145 },
-            'TTRL': { b_median: 22373, c_median: 21372, b_std: 1574, c_std: 2221, b_cv: 8.5, c_cv: 10.4, b_n: 105, c_n: 115, b_p95: 24944, c_p95: 23736 },
-            'TTSBI': { b_median: 8052, c_median: 8040, b_std: 1035, c_std: 1017, b_cv: 13.6, c_cv: 13.8, b_n: 140, c_n: 172, b_p95: 9915, c_p95: 9654 }
+            'FCP': { b_median: 869, c_median: 828, b_std: 376, c_std: 568, b_cv: 38, c_cv: 55, b_n: 149, c_n: 172, b_p95: 1598, c_p95: 2335 },
+            'TTFB': { b_median: 151, c_median: 83, b_std: 63, c_std: 29, b_cv: 39, c_cv: 32, b_n: 149, c_n: 172, b_p95: 280, c_p95: 145 },
+            'TTRL': { b_median: 22393, c_median: 21372, b_std: 1586, c_std: 2221, b_cv: 8.5, c_cv: 10.4, b_n: 108, c_n: 115, b_p95: 24944, c_p95: 23736 },
+            'TTRR': { b_median: 1636, c_median: 1531, b_std: 262, c_std: 327, b_cv: 15.5, c_cv: 17, b_n: 105, c_n: 120, b_p95: 2106, c_p95: 2220 },
+            'TTRS': { b_median: 11896, c_median: 10820, b_std: 1339, c_std: 1480, b_cv: 13.4, c_cv: 15.1, b_n: 108, c_n: 115, b_p95: 14149, c_p95: 12681 },
+            'TTSBI': { b_median: 8062, c_median: 8040, b_std: 1022, c_std: 1017, b_cv: 13.4, c_cv: 13.8, b_n: 149, c_n: 172, b_p95: 9915, c_p95: 9654 }
         };
 
         // Median Chart
