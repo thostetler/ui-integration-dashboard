@@ -1,73 +1,89 @@
-# React + TypeScript + Vite
+# UI Integration Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+An interactive performance analysis dashboard for comparing UI integration test results across different time periods and CPU throttling scenarios.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Multiple Comparison Views**: Compare performance across Nov 2024, Jan 2025, Oct 2025, and Nov 2025
+- **Throttling Scenarios**: Analyze both normal load and 6x CPU throttling conditions
+- **Four Key Metrics**:
+  - **TTRL** (Time to Request Loaded): How long until page loads and is usable
+  - **TTSBI** (Time to Search Box Interaction): How long until search bar is ready
+  - **TTRS** (Time to Results Shown): How long to get initial search results
+  - **TTRR** (Time to Results Rendered): How long to get refined search results
+- **Visual Analysis**: Side-by-side baseline vs current values with color-coded severity indicators
+- **Organized Dropdown**: Sectioned comparison selector for easy navigation
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Vite** - Fast build tool
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Recharts** - Data visualization
+- **Tailwind CSS** - Styling
+- **PapaParse** - CSV data parsing
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# Install dependencies
+npm install
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Start development server
+npm run dev
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# Build for production
+npm run build
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Preview production build
+npm run preview
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## GitHub Pages Deployment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This project is configured to automatically deploy to GitHub Pages when changes are pushed to the `main` or `master` branch.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Setup Instructions
+
+1. **Enable GitHub Pages in your repository**:
+   - Go to Settings → Pages
+   - Under "Build and deployment", select "GitHub Actions" as the source
+
+2. **Push changes**: The workflow will automatically build and deploy your site
+
+3. **Access your dashboard**: Visit `https://<username>.github.io/ui-integration-dashboard/`
+
+### Manual Deployment
+
+If you need to deploy manually:
+
+```bash
+# Build the project
+npm run build
+
+# The dist/ folder contains your static site ready to deploy
 ```
+
+## Data Structure
+
+The dashboard reads CSV files from the `/data` directory with the following structure:
+
+- `nov-2024-baseline.csv` - Baseline data from November 2024
+- `jan-2025-v0_19_96.csv` - January 2025 data
+- `oct-2025-v0_24_0.csv` - October 2025 data
+- `nov-2025.csv` - November 2025 data
+
+Each CSV includes columns for different metrics (TTRL, TTSBI, TTRS, TTRR) under both normal and 6x CPU throttling conditions.
+
+## Performance Thresholds
+
+| Metric | Good | Warning | Critical |
+|--------|------|---------|----------|
+| TTRL | <3.5s | 3.5-5s | >5s |
+| TTSBI | <1.7s | 1.7-3s | >3s |
+| TTRS | <1.5s | 1.5-2.5s | >2.5s |
+| TTRR | <1.2s | 1.2-2s | >2s |
+
+## License
+
+MIT
